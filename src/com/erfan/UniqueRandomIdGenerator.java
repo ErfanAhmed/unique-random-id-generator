@@ -24,7 +24,7 @@ public class UniqueRandomIdGenerator {
      * prime numbers are for mod(%) operation
      * prime number must not be greater than (LETTER.length + 1)
      */
-    private static List<Integer> PRIME_LIST = makePrimList(11, LETTER.length);
+    private static List<Integer> PRIME_LIST = makePrimList(2, LETTER.length);
     private static int START_POS = 0;
 
     public static String getUniqueRandomId() {
@@ -41,14 +41,14 @@ public class UniqueRandomIdGenerator {
         int nanoSec = localDateTime.getNano();
 
         uniqueRandomId.append(LETTER[year % getRandomPrime()])
-                .append(LETTER[month])
+                .append(LETTER[month % getRandomPrime()])
                 .append(LETTER[day % getRandomPrime()])
                 .append(LETTER[hour % getRandomPrime()])
-                .append(LETTER[minute < LETTER.length ? minute : minute % getRandomPrime()])
-                .append(LETTER[sec < LETTER.length ? sec : sec % getRandomPrime()])
+                .append(LETTER[minute % getRandomPrime()])
+                .append(LETTER[sec % getRandomPrime()])
                 .append(LETTER[nanoSec % getRandomPrime()]);
 
-        return uniqueRandomId.toString();
+        return shuffle(uniqueRandomId);
     }
 
     public static String getUniqueRandomId(String prefixOrSuffix, Enum type) {
@@ -101,6 +101,26 @@ public class UniqueRandomIdGenerator {
                 });
 
         return primeNumList;
+    }
+
+    /**
+     * this method shuffles the generated uid which increases randomness during concurrent actions
+     *
+     * @param uid
+     * @return randomly shuffled uid
+     */
+    private static String shuffle(StringBuilder uid) {
+        StringBuilder newId = new StringBuilder();
+
+        for (int i = 0; i < uid.length() + 1; i++) {
+            int pos = new Random().ints(1, 0, uid.length()).findFirst().getAsInt();
+            newId.append(uid.charAt(pos));
+            uid.deleteCharAt(pos);
+
+            i = 0;
+        }
+
+        return newId.toString();
     }
 
     public enum Type {
